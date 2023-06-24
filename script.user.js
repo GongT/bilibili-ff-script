@@ -43,8 +43,8 @@
         createButton('▶️', '原速', resetSpeed);
         createButton('⏩', '加速', incSpeed);
         createFrameInput();
-        createButton('◀️', '后退一帧', forwardFrame);
-        createButton('▶️', '前进一帧', backwardFrame);
+        createButton('◀️', '后退一帧', backwardFrame);
+        createButton('▶️', '前进一帧', forwardFrame);
         createButton('📸', '截图', screenshot);
 
         // video.requestVideoFrameCallback(frameHandle);
@@ -95,10 +95,12 @@
     function backwardFrame(){
         if(!video.paused) video.pause();
         video.currentTime -= oneFrameTime();
+        // console.log(video.currentTime);
     }
     function forwardFrame(){
         if(!video.paused) video.pause();
         video.currentTime += oneFrameTime();
+        // console.log(video.currentTime);
     }
     function screenshot(){
         try{
