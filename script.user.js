@@ -12,7 +12,20 @@
 (function() {
     'use strict';
 
+    function findPlayer() {
+        let player;
+
+        player = document.querySelector('bwp-video');
+        if(player && (player.playbackRate || video.getPlaybackRate)) return player;
+
+        player = document.querySelector('video');
+        if(player && player.playbackRate) return player;
+
+        return null;
+    }
+
     let video, lastFrame, frameRate = 29;
+    let getRate, setRate, setTime, getTime;
     const ctr = document.createElement('div');
     ctr.id = 'ff-script';
     Object.assign(ctr.style, {
@@ -32,9 +45,36 @@
     }
 
     function execute() {
-        video = document.querySelector('video');
+        video = findPlayer();
         if(!video) {
             return alert('快进快退脚本：页面结构改变，无法运行。');
+        }
+
+        if(Object.hasOwn(video, 'getPlaybackRate')) {
+            getRate = function () {
+                return video.getPlaybackRate();
+            }
+            setRate = function (r) {
+                video.setPlaybackRate(r);
+            }
+        }else{
+            getRate = function () {
+                return video.playbackRate;
+            }
+            setRate = function (r) {
+                video.playbackRate = r;
+            }
+        }
+        setTime = function (t) {
+            try{
+                video.currentTime = t;
+            }catch(e){
+                console.error(e);
+            }
+            console.log('???',video.currentTime,t);
+        }
+        getTime = function (t) {
+            return video.currentTime;
         }
 
         document.body.append(ctr);
@@ -77,16 +117,20 @@
     }
 
     function resetSpeed() {
-        video.playbackRate = 1;
+        setRate(1);
     }
     function decSpeed() {
-        if(video.playbackRate > 1) video.playbackRate -= 1;
-        else video.playbackRate = video.playbackRate/2;
+        let r = getRate();
+        if(r > 1) r -= 1;
+        else r = r/2;
+        setRate(r);
     }
     function incSpeed() {
-        if(video.playbackRate >= 1) video.playbackRate += 1;
-        else if(video.playbackRate>0.5) video.playbackRate = 1;
-        else video.playbackRate = video.playbackRate*2;
+        let r = getRate();
+        if(r >= 1) r += 1;
+        else if(r>0.5) r = 1;
+        else r = r*2;
+        setRate(r);
     }
 
     function oneFrameTime() {
@@ -94,13 +138,11 @@
     }
     function backwardFrame(){
         if(!video.paused) video.pause();
-        video.currentTime -= oneFrameTime();
-        // console.log(video.currentTime);
+        setTime(getTime() - oneFrameTime());
     }
     function forwardFrame(){
         if(!video.paused) video.pause();
-        video.currentTime += oneFrameTime();
-        // console.log(video.currentTime);
+        setTime(getTime() + oneFrameTime());
     }
     function screenshot(){
         try{
